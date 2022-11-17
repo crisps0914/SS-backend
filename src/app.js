@@ -1,4 +1,6 @@
 const express = require('express');
+const xss = require('xss-clean');
+const mongoSanitize = require('express-mongo-sanitize');
 const cors = require('cors');
 const routes = require('./routes/v1');
 
@@ -10,6 +12,10 @@ app.use(express.json());
 
 // parse urlencoded request body
 app.use(express.urlencoded({ extended: true }));
+
+// sanitize request data
+app.use(xss());
+app.use(mongoSanitize());
 
 // enable cors  
 app.use(cors());
