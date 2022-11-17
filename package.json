@@ -1,5 +1,6 @@
 {
   "name": "ss-backend",
+  "license": "MIT",
   "version": "1.0.0",
   "description": "ss backend using express on docker",
   "main": "src/index.js",
