@@ -1,29 +1,42 @@
-const express = require('express');
-const cors = require('cors');
-const routes = require('./routes/v1');
+const mongoose = require('mongoose');
+const app = require('./app');
+const config = require('./config/config');
 
-// Constants
-const PORT = 8000;
-const HOST = '127.0.0.1';
-
-// App
-const app = express();
-
-// parse json request body
-app.use(express.json());
-
-// parse urlencoded request body
-app.use(express.urlencoded({ extended: true }));
-
-// enable cors
-app.use(cors());
-app.options('*', cors());
-
-
-app.get('/', (req, res) => {
+let server;
+mongoose.connect(config.mongoose.url, config.mongoose.options).then(() => {
+  console.log('Connected to MongoDB');
+  // Hello world
+  app.get('/', (req, res) => {
     res.send('Hello World')
+  });
+
+  server = app.listen(config.port, () => {
+    console.log(`Listening to port ${config.port}`);
+  });
 });
 
-app.listen(PORT, HOST, () => {
-    console.log(`Running on http://${HOST}:${PORT}`);
-})
+const exitHandler = () => {
+  if (server) {
+    server.close(() => {
+      console.log('Server closed');
+      process.exit(1);
+    });
+  } else {
+    process.exit(1);
+  }
+};
+
+const unexpectedErrorHandler = (error) => {
+  console.log(error);
+  exitHandler();
+};
+
+process.on('uncaughtException', unexpectedErrorHandler);
+process.on('unhandledRejection', unexpectedErrorHandler);
+
+process.on('SIGTERM', () => {
+  console.log('SIGTERM received');
+  if (server) {
+    server.close();
+  }
+});
